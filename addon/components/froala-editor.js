@@ -7,6 +7,7 @@ export default Ember.Component.extend({
 
     tagName: 'div',
     _froala: null,
+    defaultParams: {},
     params: {},
     value: null,
     eventNames: [
@@ -97,10 +98,12 @@ export default Ember.Component.extend({
     ],
 
     didInsertElement: function() {
-        var froala = this.$().editable(this.get('params')),
-            events = this.get('eventNames');
-
+        const defaultParams = this.get('defaultParams');
+        const events = this.get('eventNames');
+        const params = Ember.merge(defaultParams, this.get('params'));
+        const froala = this.$().editable(params);
         const froalaElement = this.$();
+
         froalaElement.editable('setHTML', this.get('value') || '', false);
 
         events.forEach((key) => {
