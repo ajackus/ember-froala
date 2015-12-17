@@ -24,14 +24,24 @@ export default Ember.Component.extend({
         this.set('_froala', froala);
     },
 
-    handleFroalaEvent: function(event, editor) {
-      var events = this.get('eventNames');
+    handleFroalaEvent: function(event, editor,x,y,z) {
       const eventName = event.namespace;
       const reverseEventName = eventName.replace(/\./g,"_");
+      const actionHandler = this.attrs[reverseEventName||"image_beforeUpload"];
       if(isFunction(actionHandler)) {
         actionHandler(event, editor);
       } else {
-        this.sendAction(reverseEventName, event, editor);
+        if(eventName=='beforeUpload.image'){
+          var beforeUpload = this.attrs.image_beforeUpload(event, editor,x);
+          if(beforeUpload===false){
+            return false;
+          }
+        }else{
+          var action =  this.attrs[reverseEventName];
+          if(action===false){
+            return false;
+          }
+        }
       }
     },
     willDestroyElement: function() {
