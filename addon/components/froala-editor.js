@@ -9,7 +9,7 @@ export default Ember.Component.extend({
     _froala: null,
     params: {},
     didInsertElement: function() {
-        var buttons = this.get('customButtons') || Ember.K;
+        var buttons = this.get('customButtons') || function() {};
         buttons();
         var froala = this.$().froalaEditor(this.get('params'));
         const froalaElement = this.$();
