@@ -8,15 +8,39 @@ export default Ember.Component.extend({
     classNames: ['froalaEditor'],
     _froala: null,
     params: {},
+
+    // we need this to prevent re-setting html it after content changed
+    _observeValue: true,
+
+    contentChanged() {
+        let html = this.get('_froala').froalaEditor('html.get');
+
+        // this prevents `setValue` to be called and so the html to be re-set, which we do not want.
+        this.set('_observeValue', false);
+        this.set('value', html);
+        this.set('_observeValue', true);
+    },
+
+    valueChanged: function() {
+        if (this.get('_observeValue')) {
+            this.setValue();
+        }
+    }.observes('value'),
+
+    setValue() {
+        this.get('_froala').froalaEditor('html.set', this.get('value') || '');
+    },
+
     didInsertElement: function() {
         var buttons = this.get('customButtons') || Ember.K;
         buttons();
         var froala = this.$().froalaEditor(this.get('params'));
         const froalaElement = this.$();
-        froalaElement.froalaEditor('html.set', this.get('value') || '', false);
+        this.setValue();
+        froalaElement.on('froalaEditor.keyup', Ember.run.bind(this, this.contentChanged));
         for(var prop in this.attrs){
           if(prop !=='params') {
-            var key = prop.replace(/_/g,".");           
+            var key = prop.replace(/_/g,".");
             froalaElement.on('froalaEditor.' + key, proxy(this.handleFroalaEvent, this,key));
           }
         }
